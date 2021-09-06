@@ -1,0 +1,65 @@
+﻿@page "/"
+@page "/{id}"
+
+@using TimerToysWasm.Model
+@using System.Collections.Generic
+@inject HttpClient Http
+
+
+@{
+
+    <PageComponent @ref="pageComp"></PageComponent>
+
+    for (int idx = 0; idx < 50; idx++)
+    {
+        int i2 = idx;
+        <TimerToyComponent @ref=tta[i2] />
+    }
+
+    if (timers == null)
+    {
+        //pageHeader.SetName("Still Loading . . .");
+    }
+    else
+    {
+        pageComp.SetName(timers[0].PageName);
+
+        int idx = 0;
+        foreach (Model.Timer t in timers)
+        {
+            tta[idx].SetTimer(t);
+            idx++;
+        }
+
+    }
+
+}
+
+
+@code {
+
+    [Parameter]
+    public string id { get; set; }
+
+    private Model.Timer[] timers;
+
+
+    private PageComponent pageComp = new PageComponent();
+    private TimerToyComponent[] tta = new TimerToyComponent[100];
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            timers = await Http.GetFromJsonAsync<Timer[]>("getnewpage");
+        }
+        else
+        {
+            timers = await Http.GetFromJsonAsync<Timer[]>(string.Format("getallbypage/{0}", id));
+        }
+
+    }
+
+
+}

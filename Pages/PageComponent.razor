@@ -1,0 +1,15 @@
+﻿
+<h1>@pageName</h1>
+
+@code {
+
+    private string pageName;
+
+
+    public void SetName(string pageName)
+    {
+        this.pageName = pageName;
+        StateHasChanged();
+    }
+
+}

@@ -1,0 +1,18 @@
+﻿
+
+<h1>@timerName</h1>
+<h4>@timerKey</h4>
+
+@code {
+
+    private string timerName;
+    private string timerKey;
+
+    public void SetTimer(Model.Timer tmr)
+    {
+        timerName = tmr.TimerDescription;
+        timerKey = tmr.TimerKey;
+        StateHasChanged();
+    }
+
+}
