@@ -4,6 +4,7 @@
 @using TimerToysWasm.Model
 @using System.Collections.Generic
 @inject HttpClient Http
+@inject NavigationManager NavManager
 
 
 @{
@@ -18,10 +19,15 @@
 
     if (timers == null)
     {
-        //pageHeader.SetName("Still Loading . . .");
+        <h4><em>Still Loading . . .</em></h4>
     }
     else
     {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            NavManager.NavigateTo(string.Format("/{0}", timers[0].PageKey));
+        }
+
         pageComp.SetName(timers[0].PageName);
 
         int idx = 0;
@@ -56,6 +62,7 @@
         }
         else
         {
+            //id = 0652EE5B-FA13-4585-A278-BB1F7D73F38A
             timers = await Http.GetFromJsonAsync<Timer[]>(string.Format("getallbypage/{0}", id));
         }
 
