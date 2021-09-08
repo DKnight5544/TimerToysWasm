@@ -1,16 +1,26 @@
 ﻿
-<input class="page-name" value="@pageName" 
+<input class="page-name" value="@pageName"
+       @onchange="@((ChangeEventArgs e) => PageName_onChange(e))"
        />
+
+<p>@msg1</p>
 
 @code {
 
     private string pageName;
+
+    private string msg1 = "";
 
 
     public void SetName(string pageName)
     {
         this.pageName = pageName;
         StateHasChanged();
+    }
+
+    private void PageName_onChange(ChangeEventArgs e)
+    {
+        msg1 = e.Value.ToString();
     }
 
 }
