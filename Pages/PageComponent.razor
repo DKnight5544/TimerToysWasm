@@ -1,26 +1,37 @@
 ﻿
-<input class="page-name" value="@pageName"
-       @onchange="@((ChangeEventArgs e) => PageName_onChange(e))"
-       />
+@using TimerToysShared.Model
 
-<p>@msg1</p>
+@inject HttpClient Http
+
+<input class="page-name" @bind="pageName" onfocus="this.select();" />
 
 @code {
 
-    private string pageName;
+    private Timer myTimer = new Timer();
 
-    private string msg1 = "";
-
-
-    public void SetName(string pageName)
+    private String pageName
     {
-        this.pageName = pageName;
-        StateHasChanged();
+        get { return myTimer.PageName; }
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                StateHasChanged();
+            }
+            else
+            {
+                myTimer.PageName = value;
+                Http.PostAsJsonAsync("UpdatePageName", myTimer);
+            }
+        }
     }
 
-    private void PageName_onChange(ChangeEventArgs e)
+
+    public void SetName(Timer tmr)
     {
-        msg1 = e.Value.ToString();
+        myTimer = tmr;
+        pageName = tmr.PageName;
+        StateHasChanged();
     }
 
 }
