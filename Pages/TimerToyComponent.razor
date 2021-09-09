@@ -1,4 +1,6 @@
 ﻿
+@using TimerToysShared.Model
+
 <div class="timer-container " style="display:@display;">
     <p>@timerName</p>
     <p>@timerKey</p>
@@ -10,7 +12,7 @@
     private string timerKey;
     private string display = "none";
 
-    public void SetTimer(Model.Timer tmr)
+    public void SetTimer(Timer tmr)
     {
         timerName = tmr.TimerDescription;
         timerKey = tmr.TimerKey;

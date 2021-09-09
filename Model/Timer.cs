@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TimerToysWasm.Model
+namespace TimerToysShared.Model
 {
 	public class Timer
 	{

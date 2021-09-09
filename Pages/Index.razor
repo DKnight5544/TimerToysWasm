@@ -1,7 +1,7 @@
 ﻿@page "/"
 @page "/{id}"
 
-@using TimerToysWasm.Model
+@using TimerToysShared.Model
 @using System.Collections.Generic
 @inject HttpClient Http
 @inject NavigationManager NavManager
@@ -31,7 +31,7 @@
         pageComp.SetName(timers[0].PageName);
 
         int idx = 0;
-        foreach (Model.Timer t in timers)
+        foreach (Timer t in timers)
         {
             tta[idx].SetTimer(t);
             idx++;
@@ -47,7 +47,7 @@
     [Parameter]
     public string id { get; set; }
 
-    private Model.Timer[] timers;
+    private Timer[] timers;
 
 
     private PageComponent pageComp = new PageComponent();
