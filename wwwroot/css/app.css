@@ -8,25 +8,59 @@ html, body {
     padding-right:0;
 }
 
-.page-name{
-    position:fixed;
-    top:0; left:0;
-    width:100%;
+.page-name {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
     background-color: maroon;
-    border:none;
-    color:white;
-    padding:10px;
-    font-size:18px;
+    border: none;
+    color: white;
+    padding: 10px;
+    font-size: 24px;
 }
 
 .timer-container {
     display: none;
     border: 2px solid maroon;
     color: maroon;
-    width: 400px;
+    width: 340px;
     float: left;
-    padding:5px;
+    padding:0px;
     margin-left: 10px;
     margin-top: 18px;
     margin-right:8px;
+}
+
+.timer-name {
+    width: 100%;
+    background-color: maroon;
+    border: none;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+
+.elapsed-time {
+    width: 170px;
+    background-color: transparent;
+    border: none;
+    color: maroon;
+    padding: 10px;
+    box-sizing: border-box;
+    font-family: Courier New, Courier, monospace;
+    font-size: 30px;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+
+.toggle-timer-button{
+    width:25px;
+    height:25px;
+    border:solid 2px maroon;
+    border-radius:5px;
+    cursor:pointer;
+    
 }

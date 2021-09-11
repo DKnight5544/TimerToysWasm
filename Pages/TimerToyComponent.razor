@@ -1,23 +1,90 @@
 ﻿
 @using TimerToysShared.Model
 
+@inject HttpClient Http
+
 <div class="timer-container " style="display:@display;">
-    <p>@timerName</p>
-    <p>@timerKey</p>
+    <input class="timer-name" @bind="timerName" onfocus="this.select();" />
+    <input class="elapsed-time" @bind="elapsedTime" onfocus="this.select();" />
+
+    <button class="toggle-timer-button" 
+            @onclick="ToggleTimer" 
+            style="background-color: @toggleButtonBackgroundColor;">
+    </button>
+
 </div>
 
 @code {
 
-    private string timerName;
-    private string timerKey;
+    private Timer myTimer = new Timer();
     private string display = "none";
+    private string toggleButtonBackgroundColor;
+
+    private string timerName
+    {
+        get { return myTimer.TimerDescription; }
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                StateHasChanged();
+            }
+            else
+            {
+                myTimer.TimerDescription = value;
+                Http.PostAsJsonAsync("UpdateTimerName", myTimer);
+            }
+        }
+    }
+
+    private string elapsedTime
+    {
+        get
+        {
+            int sec = myTimer.ElapsedTime;
+            int hrs = sec / 3600;
+
+            sec -= (hrs * 3600);
+
+            int min = sec / 60;
+
+            sec -= (min * 60);
+
+            return string.Format("{0:00}:{1:00}:{2:00}", hrs, min, sec);
+
+        }
+
+        set
+        {
+
+        }
+    }
+
+    private async void ToggleTimer()
+    {
+        string apiName = string.Format("ToggleTimer/{0}", myTimer.TimerKey);
+        Timer tmr = await Http.GetFromJsonAsync<Timer>(apiName);
+        SetTimer(tmr);
+    }
+
+
 
     public void SetTimer(Timer tmr)
     {
+        myTimer = tmr;
         timerName = tmr.TimerDescription;
-        timerKey = tmr.TimerKey;
         display = "block";
+        toggleButtonBackgroundColor = (tmr.IsRunning ? "maroon" : "transparent");
         StateHasChanged();
+    }
+
+    public void Tick()
+    {
+        if (myTimer.IsRunning)
+        {
+            myTimer.ElapsedTime++;
+            StateHasChanged();
+        }
     }
 
 }

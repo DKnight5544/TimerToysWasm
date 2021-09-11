@@ -37,6 +37,8 @@
             idx++;
         }
 
+        ticker = new System.Threading.Timer(Tick, null, 1000, 1000);
+
     }
 
 }
@@ -48,6 +50,8 @@
     public string id { get; set; }
 
     private Timer[] timers;
+
+    private System.Threading.Timer ticker;
 
 
     private PageComponent pageComp = new PageComponent();
@@ -68,5 +72,13 @@
 
     }
 
-
+    private void Tick(Object stateInfo)
+    {
+        int idx = 0;
+        foreach (Timer t in timers)
+        {
+            tta[idx].Tick();
+            idx++;
+        }
+    }
 }
