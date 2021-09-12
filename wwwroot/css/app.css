@@ -44,23 +44,33 @@ html, body {
 }
 
 .elapsed-time {
+    display: block;
+    float: left;
+    margin: 0px;
     width: 170px;
     background-color: transparent;
     border: none;
     color: maroon;
-    padding: 10px;
     box-sizing: border-box;
     font-family: Courier New, Courier, monospace;
+    padding: 10px;
+    padding-bottom: 5px;
     font-size: 30px;
     font-weight: bold;
     box-sizing: border-box;
 }
 
-.toggle-timer-button{
-    width:25px;
-    height:25px;
-    border:solid 2px maroon;
-    border-radius:5px;
-    cursor:pointer;
-    
+.toggle-timer-button {
+    display: block;
+    float: left;
+    margin-top: 10px;
+    margin-left: 12px;
+    background-color: white;
+    color: maroon;
+    border: solid 2px maroon;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
 }

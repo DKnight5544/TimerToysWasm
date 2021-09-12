@@ -5,12 +5,15 @@
 
 <div class="timer-container " style="display:@display;">
     <input class="timer-name" @bind="timerName" onfocus="this.select();" />
-    <input class="elapsed-time" @bind="elapsedTime" onfocus="this.select();" />
 
-    <button class="toggle-timer-button" 
-            @onclick="ToggleTimer" 
-            style="background-color: @toggleButtonBackgroundColor;">
-    </button>
+    <input class="elapsed-time"
+           @bind="elapsedTime"
+           @onclick="PauseTimer"
+           @onblur="ResumeTimer" 
+           onfocus="this.select()" 
+           />
+
+    <button class="toggle-timer-button" @onclick="ToggleTimer">@buttonText </button>
 
 </div>
 
@@ -18,7 +21,8 @@
 
     private Timer myTimer = new Timer();
     private string display = "none";
-    private string toggleButtonBackgroundColor;
+    private bool isPaused;
+    private string buttonText;
 
     private string timerName
     {
@@ -56,9 +60,46 @@
 
         set
         {
+            if (string.IsNullOrWhiteSpace(value)) return;
+
+            var arr = value.Split(":");
+            var seconds = 0;
+
+            if (arr.Length > 3) return;
+
+            if (arr.Length == 1)
+            {
+                seconds = getSeconds(arr[0], 1);
+            }
+
+            if (arr.Length == 2)
+            {
+                seconds = getSeconds(arr[0], 60);
+                seconds += getSeconds(arr[1], 1);
+            }
+
+            if (arr.Length == 3)
+            {
+                seconds = getSeconds(arr[0], 3600);
+                seconds += getSeconds(arr[1], 60);
+                seconds += getSeconds(arr[2], 1);
+            }
+
+            AdjustTimer(seconds);
+            ResumeTimer();
 
         }
     }
+
+    private int getSeconds(string seg, int offset)
+    {
+        int segInt = 0;
+        if (int.TryParse(seg, out segInt)) return segInt * offset;
+        return 0;
+    }
+
+    private void PauseTimer() { isPaused = true; }
+    private void ResumeTimer() { isPaused = false; }
 
     private async void ToggleTimer()
     {
@@ -67,14 +108,20 @@
         SetTimer(tmr);
     }
 
-
+    private async void AdjustTimer(int seconds)
+    {
+        myTimer.ElapsedTime = seconds;
+        var response = await Http.PostAsJsonAsync("AdjustTimer", myTimer);
+        Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
+        SetTimer(tmr);
+    }
 
     public void SetTimer(Timer tmr)
     {
         myTimer = tmr;
         timerName = tmr.TimerDescription;
         display = "block";
-        toggleButtonBackgroundColor = (tmr.IsRunning ? "maroon" : "transparent");
+        buttonText = (tmr.IsRunning) ? "OFF" : "ON";
         StateHasChanged();
     }
 
@@ -83,8 +130,18 @@
         if (myTimer.IsRunning)
         {
             myTimer.ElapsedTime++;
-            StateHasChanged();
+            if(!isPaused) StateHasChanged();
         }
+    }
+
+    public void ButtonPressed()
+    {
+
+        if (buttonText == "OFF" || buttonText == "ON")
+        {
+            ToggleTimer();
+        }
+
     }
 
 }
