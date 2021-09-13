@@ -5,17 +5,17 @@
 @inject HttpClient Http
 
 <div class="timer-container " style="display:@display;">
-    <input class="timer-name" 
-           @bind="timerName" 
+    <input class="timer-name"
+           @bind="timerName"
            @onclick="TimerName_onclick"
-           onfocus="this.select();" 
-           />
+           tabindex="-1"
+           onfocus="this.select();" />
 
     <input class="elapsed-time"
            @bind="elapsedTimeString"
            @onclick="ElapsedTime_onclick"
-           onfocus="this.select()" 
-           />
+           tabindex="-1"
+           onfocus="this.select()" />
 
     <button class="toggle-timer-button btn1" @onclick="Button1Pressed">@buttonText1 </button>
     <button class="toggle-timer-button btn2" @onclick="Button2Pressed">@buttonText2 </button>
@@ -30,26 +30,11 @@
     private string buttonText2;
     private UpdateTarget updateTarget;
 
-    private string timerName
-    {
-        get { return myTimer.TimerDescription; }
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                StateHasChanged();
-            }
-            else
-            {
-                myTimer.TimerDescription = value;
-                Http.PostAsJsonAsync("UpdateTimerName", myTimer);
-            }
-        }
-    }
 
+    public string timerName { get; set; }
     private string elapsedTimeString { get; set; }
 
-    private string stringifyElapsedTime (int seconds)
+    private string stringifyElapsedTime(int seconds)
     {
 
         int sec = seconds;
@@ -105,15 +90,15 @@
         if (updateTarget == UpdateTarget.TimerStopStart)
         {
             //button 1 is STOP
-            if(myTimer.IsRunning) ToggleTimer();
+            if (myTimer.IsRunning) ToggleTimer();
+
         }
 
-        if (updateTarget == UpdateTarget.ElapsedTime)
+        else if (updateTarget == UpdateTarget.ElapsedTime)
         {
             if (string.IsNullOrWhiteSpace(elapsedTimeString))
             {
                 SetTimer(myTimer);
-                return;
             }
 
             int? seconds = getSeconds(elapsedTimeString);
@@ -125,10 +110,23 @@
             else
             {
                 SetTimer(myTimer);
-                return;
             }
 
         }
+
+        else if (updateTarget == UpdateTarget.TimerName)
+        {
+            if (!string.IsNullOrWhiteSpace(timerName))
+            {
+                myTimer.TimerDescription = timerName;
+                Http.PostAsJsonAsync("UpdateTimerName", myTimer);
+            }
+
+            SetTimer(myTimer);
+
+        }
+
+        return;
 
     }
 
@@ -144,7 +142,11 @@
         if (updateTarget == UpdateTarget.ElapsedTime)
         {
             SetTimer(myTimer);
-            return;
+        }
+
+        else if (updateTarget == UpdateTarget.TimerName)
+        {
+            SetTimer(myTimer);
         }
 
     }
