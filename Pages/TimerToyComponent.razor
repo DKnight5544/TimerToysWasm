@@ -1,20 +1,24 @@
 ﻿
 @using TimerToysShared.Model
+@using TimerToysWasm.Model
 
 @inject HttpClient Http
 
 <div class="timer-container " style="display:@display;">
-    <input class="timer-name" @bind="timerName" onfocus="this.select();" />
+    <input class="timer-name" 
+           @bind="timerName" 
+           @onclick="TimerName_onclick"
+           onfocus="this.select();" 
+           />
 
     <input class="elapsed-time"
-           @bind="elapsedTime"
-           @onclick="PauseTimer"
-           @onblur="ResumeTimer" 
+           @bind="elapsedTimeString"
+           @onclick="ElapsedTime_onclick"
            onfocus="this.select()" 
            />
 
-    <button class="toggle-timer-button" @onclick="ToggleTimer">@buttonText </button>
-
+    <button class="toggle-timer-button btn1" @onclick="Button1Pressed">@buttonText1 </button>
+    <button class="toggle-timer-button btn2" @onclick="Button2Pressed">@buttonText2 </button>
 </div>
 
 @code {
@@ -22,7 +26,9 @@
     private Timer myTimer = new Timer();
     private string display = "none";
     private bool isPaused;
-    private string buttonText;
+    private string buttonText1;
+    private string buttonText2;
+    private UpdateTarget updateTarget;
 
     private string timerName
     {
@@ -41,64 +47,41 @@
         }
     }
 
-    private string elapsedTime
+    private string elapsedTimeString { get; set; }
+
+    private string stringifyElapsedTime (int seconds)
     {
-        get
-        {
-            int sec = myTimer.ElapsedTime;
-            int hrs = sec / 3600;
 
-            sec -= (hrs * 3600);
+        int sec = seconds;
+        int hrs = sec / 3600;
 
-            int min = sec / 60;
+        sec -= (hrs * 3600);
 
-            sec -= (min * 60);
+        int min = sec / 60;
 
-            return string.Format("{0:00}:{1:00}:{2:00}", hrs, min, sec);
+        sec -= (min * 60);
 
-        }
+        return string.Format("{0:00}:{1:00}:{2:00}", hrs, min, sec);
 
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value)) return;
-
-            var arr = value.Split(":");
-            var seconds = 0;
-
-            if (arr.Length > 3) return;
-
-            if (arr.Length == 1)
-            {
-                seconds = getSeconds(arr[0], 1);
-            }
-
-            if (arr.Length == 2)
-            {
-                seconds = getSeconds(arr[0], 60);
-                seconds += getSeconds(arr[1], 1);
-            }
-
-            if (arr.Length == 3)
-            {
-                seconds = getSeconds(arr[0], 3600);
-                seconds += getSeconds(arr[1], 60);
-                seconds += getSeconds(arr[2], 1);
-            }
-
-            AdjustTimer(seconds);
-            ResumeTimer();
-
-        }
     }
 
-    private int getSeconds(string seg, int offset)
+    private void TimerName_onclick()
     {
-        int segInt = 0;
-        if (int.TryParse(seg, out segInt)) return segInt * offset;
-        return 0;
+        updateTarget = UpdateTarget.TimerName;
+        buttonText1 = "SAVE";
+        buttonText2 = "CANCEL";
+    }
+
+    private void ElapsedTime_onclick()
+    {
+        PauseTimer();
+        updateTarget = UpdateTarget.ElapsedTime;
+        buttonText1 = "SAVE";
+        buttonText2 = "CANCEL";
     }
 
     private void PauseTimer() { isPaused = true; }
+
     private void ResumeTimer() { isPaused = false; }
 
     private async void ToggleTimer()
@@ -116,12 +99,106 @@
         SetTimer(tmr);
     }
 
+    private void Button1Pressed()
+    {
+
+        if (updateTarget == UpdateTarget.TimerStopStart)
+        {
+            //button 1 is STOP
+            if(myTimer.IsRunning) ToggleTimer();
+        }
+
+        if (updateTarget == UpdateTarget.ElapsedTime)
+        {
+            if (string.IsNullOrWhiteSpace(elapsedTimeString))
+            {
+                SetTimer(myTimer);
+                return;
+            }
+
+            int? seconds = getSeconds(elapsedTimeString);
+
+            if (seconds.HasValue)
+            {
+                AdjustTimer(seconds.Value);
+            }
+            else
+            {
+                SetTimer(myTimer);
+                return;
+            }
+
+        }
+
+    }
+
+    private void Button2Pressed()
+    {
+
+        if (updateTarget == UpdateTarget.TimerStopStart)
+        {
+            //button 2 is START
+            if (!myTimer.IsRunning) ToggleTimer();
+        }
+
+        if (updateTarget == UpdateTarget.ElapsedTime)
+        {
+            SetTimer(myTimer);
+            return;
+        }
+
+    }
+
+    private int? getSeconds(string secondsString)
+    {
+        int? seconds = new int?();
+
+        secondsString = secondsString.Replace(".", ":");
+        var arr = secondsString.Split(":");
+
+        if (arr.Length > 3)
+        {
+            return seconds;
+        }
+
+        if (arr.Length == 1)
+        {
+            seconds = getSeconds(arr[0], 1);
+        }
+
+        if (arr.Length == 2)
+        {
+            seconds = getSeconds(arr[0], 60);
+            seconds += getSeconds(arr[1], 1);
+        }
+
+        if (arr.Length == 3)
+        {
+            seconds = getSeconds(arr[0], 3600);
+            seconds += getSeconds(arr[1], 60);
+            seconds += getSeconds(arr[2], 1);
+        }
+
+        return seconds;
+    }
+
+    private int getSeconds(string seg, int offset)
+    {
+        int segInt = 0;
+        if (int.TryParse(seg, out segInt)) return segInt * offset;
+        return 0;
+    }
+
     public void SetTimer(Timer tmr)
     {
         myTimer = tmr;
         timerName = tmr.TimerDescription;
+        elapsedTimeString = stringifyElapsedTime(tmr.ElapsedTime);
         display = "block";
-        buttonText = (tmr.IsRunning) ? "OFF" : "ON";
+        buttonText1 = "STOP";
+        buttonText2 = "START";
+        updateTarget = UpdateTarget.TimerStopStart;
+        ResumeTimer();
         StateHasChanged();
     }
 
@@ -130,18 +207,12 @@
         if (myTimer.IsRunning)
         {
             myTimer.ElapsedTime++;
-            if(!isPaused) StateHasChanged();
+            if (!isPaused)
+            {
+                elapsedTimeString = stringifyElapsedTime(myTimer.ElapsedTime);
+                StateHasChanged();
+            }
         }
-    }
-
-    public void ButtonPressed()
-    {
-
-        if (buttonText == "OFF" || buttonText == "ON")
-        {
-            ToggleTimer();
-        }
-
     }
 
 }
