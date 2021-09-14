@@ -88,7 +88,7 @@
     {
         string apiName = string.Format("ToggleTimer/{0}", myTimer.TimerKey);
         Timer tmr = await Http.GetFromJsonAsync<Timer>(apiName);
-        DisplayTimer();
+        SetTimer(tmr);
     }
 
     private async void AdjustTimer(int seconds)
@@ -96,7 +96,7 @@
         myTimer.ElapsedTime = seconds;
         var response = await Http.PostAsJsonAsync("AdjustTimer", myTimer);
         Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
-        DisplayTimer();
+        SetTimer(tmr);
     }
 
     private void Button1Pressed()
@@ -149,8 +149,6 @@
             myTimer = new Timer();
         }
 
-        return;
-
     }
 
     private void Button2Pressed()
@@ -162,7 +160,7 @@
             if (!myTimer.IsRunning) ToggleTimer();
         }
 
-        if (updateTarget == UpdateTarget.ElapsedTime)
+        else if (updateTarget == UpdateTarget.ElapsedTime)
         {
             DisplayTimer();
         }

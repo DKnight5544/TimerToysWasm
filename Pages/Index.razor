@@ -29,7 +29,7 @@
         }
 
         int idx = 0;
-        foreach (Timer t in timers)
+        foreach (Timer t in timers.OrderBy(t => t.SortIndex))
         {
             tta[idx].SetTimer(t);
             idx++;
