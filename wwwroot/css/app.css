@@ -103,13 +103,16 @@ html, body {
 
 .delete-button {
     position: absolute;
-    top: 7px;
-    right: 7px;
+    top: 0px;
+    right:0px;
+    z-index:100;
     background-color: transparent;
     color: white;
-    border: none;
+    border:none;
+    /*border: 1px solid white;*/
     cursor: pointer;
     font-size: 14px;
+    padding:10px;
 }
 
 
