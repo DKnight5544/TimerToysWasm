@@ -17,8 +17,8 @@
            tabindex="-1"
            onfocus="this.select()" />
 
-    <button class="toggle-timer-button btn1" @onclick="Button1Pressed">@buttonText1 </button>
-    <button class="toggle-timer-button btn2" @onclick="Button2Pressed">@buttonText2 </button>
+    <button class="timer-button btn1" @onclick="Button1Pressed">@button1Text</button>
+    <button class="timer-button btn2" @onclick="Button2Pressed">@button2Text</button>
 </div>
 
 @code {
@@ -26,12 +26,11 @@
     private Timer myTimer = new Timer();
     private string display = "none";
     private bool isPaused;
-    private string buttonText1;
-    private string buttonText2;
+    private string button1Text;
+    private string button2Text;
     private UpdateTarget updateTarget;
 
-
-    public string timerName { get; set; }
+    private string timerName { get; set; }
     private string elapsedTimeString { get; set; }
 
     private string stringifyElapsedTime(int seconds)
@@ -53,16 +52,16 @@
     private void TimerName_onclick()
     {
         updateTarget = UpdateTarget.TimerName;
-        buttonText1 = "SAVE";
-        buttonText2 = "CANCEL";
+        button1Text = "SAVE";
+        button2Text = "CANCEL";
     }
 
     private void ElapsedTime_onclick()
     {
         PauseTimer();
         updateTarget = UpdateTarget.ElapsedTime;
-        buttonText1 = "SAVE";
-        buttonText2 = "CANCEL";
+        button1Text = "SAVE";
+        button2Text = "CANCEL";
     }
 
     private void PauseTimer() { isPaused = true; }
@@ -197,9 +196,10 @@
         timerName = tmr.TimerDescription;
         elapsedTimeString = stringifyElapsedTime(tmr.ElapsedTime);
         display = "block";
-        buttonText1 = "STOP";
-        buttonText2 = "START";
+        button1Text = "STOP";
+        button2Text = "START";
         updateTarget = UpdateTarget.TimerStopStart;
+        IsTimerSet = true;
         ResumeTimer();
         StateHasChanged();
     }
@@ -216,5 +216,7 @@
             }
         }
     }
+
+    public bool IsTimerSet = false;
 
 }

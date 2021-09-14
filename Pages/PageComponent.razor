@@ -1,38 +1,97 @@
 ﻿
 @using TimerToysShared.Model
+@using TimerToysWasm.Model
 
 @inject HttpClient Http
+@inject NavigationManager NavManager
 
-<input class="page-name" @bind="pageName" onfocus="this.select();" />
+<input class="page-name"
+       @bind="pageName"
+       @onclick="PageName_onclick"
+       onfocus="this.select();" />
+
+<button class="page-button" @onclick="Button1Pressed">@button1Text</button>
+<button class="page-button" @onclick="Button2Pressed">@button2Text</button>
+
+<div></div>
 
 @code {
 
     private Timer myTimer = new Timer();
+    private string button1Text;
+    private string button2Text;
+    private UpdateTarget updateTarget;
+    private TimerToyComponent[] timerCompArray;
 
-    private String pageName
+    public string pageName { get; set; }
+
+
+    private void Button1Pressed()
     {
-        get { return myTimer.PageName; }
-        set
+        if (updateTarget == UpdateTarget.PageName)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(pageName))
             {
-                StateHasChanged();
+                //cancel
+                SetPage(myTimer);
             }
             else
             {
-                myTimer.PageName = value;
+                //save
+                myTimer.PageName = pageName;
                 Http.PostAsJsonAsync("UpdatePageName", myTimer);
+                SetPage(myTimer);
             }
         }
+        else
+        {
+            //Create New Page
+            NavManager.NavigateTo("/", forceLoad: true);
+        }
+
+
+    }
+
+    private async void Button2Pressed()
+    {
+        if (updateTarget == UpdateTarget.PageName)
+        {
+            //cancel
+            SetPage(myTimer);
+        }
+        else
+        {
+            //Create New Timer
+            //NavManager.NavigateTo(string.Format("/{0}", myTimer.PageKey), forceLoad: true);
+            var response = await Http.PostAsJsonAsync("AddTimer", myTimer);
+            Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
+            timerCompArray.First(t => t.IsTimerSet == false).SetTimer(tmr);
+        }
+
+
+    }
+
+    private void PageName_onclick()
+    {
+        updateTarget = UpdateTarget.PageName;
+        button1Text = "SAVE";
+        button2Text = "CANCEL";
     }
 
 
-    public void SetName(Timer tmr)
+    public void SetPage(Timer tmr)
     {
         myTimer = tmr;
         pageName = tmr.PageName;
+        updateTarget = UpdateTarget.PageAddButtons;
+        button1Text = "ADD PAGE";
+        button2Text = "ADD TIMER";
         StateHasChanged();
     }
 
+    public void SetTimerArray(TimerToyComponent[] timerCompArray)
+    {
+        this.timerCompArray = timerCompArray;
+    }
+
 }
- 

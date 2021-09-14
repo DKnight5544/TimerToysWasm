@@ -9,6 +9,8 @@ namespace TimerToysWasm.Model
     {
         TimerName,
         ElapsedTime,
-        TimerStopStart
+        TimerStopStart,
+        PageName,
+        PageAddButtons
     }
 }
