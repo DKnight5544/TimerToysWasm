@@ -23,7 +23,13 @@
 
 @code {
 
-    private Timer myTimer = new Timer();
+
+    public Timer myTimer = new Timer();
+    public bool IsTimerSet
+    {
+        get { return ! string.IsNullOrWhiteSpace(myTimer.TimerKey); }
+    }
+
     private string display = "none";
     private bool isPaused;
     private string button1Text;
@@ -72,7 +78,7 @@
     {
         string apiName = string.Format("ToggleTimer/{0}", myTimer.TimerKey);
         Timer tmr = await Http.GetFromJsonAsync<Timer>(apiName);
-        SetTimer(tmr);
+        DisplayTimer();
     }
 
     private async void AdjustTimer(int seconds)
@@ -80,7 +86,7 @@
         myTimer.ElapsedTime = seconds;
         var response = await Http.PostAsJsonAsync("AdjustTimer", myTimer);
         Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
-        SetTimer(tmr);
+        DisplayTimer();
     }
 
     private void Button1Pressed()
@@ -97,7 +103,7 @@
         {
             if (string.IsNullOrWhiteSpace(elapsedTimeString))
             {
-                SetTimer(myTimer);
+                DisplayTimer();
             }
 
             int? seconds = getSeconds(elapsedTimeString);
@@ -108,7 +114,7 @@
             }
             else
             {
-                SetTimer(myTimer);
+                DisplayTimer();
             }
 
         }
@@ -121,7 +127,7 @@
                 Http.PostAsJsonAsync("UpdateTimerName", myTimer);
             }
 
-            SetTimer(myTimer);
+            DisplayTimer();
 
         }
 
@@ -140,12 +146,12 @@
 
         if (updateTarget == UpdateTarget.ElapsedTime)
         {
-            SetTimer(myTimer);
+            DisplayTimer();
         }
 
         else if (updateTarget == UpdateTarget.TimerName)
         {
-            SetTimer(myTimer);
+            DisplayTimer();
         }
 
     }
@@ -190,18 +196,22 @@
         return 0;
     }
 
-    public void SetTimer(Timer tmr)
+    private void DisplayTimer()
     {
-        myTimer = tmr;
-        timerName = tmr.TimerDescription;
-        elapsedTimeString = stringifyElapsedTime(tmr.ElapsedTime);
+        timerName = myTimer.TimerDescription;
+        elapsedTimeString = stringifyElapsedTime(myTimer.ElapsedTime);
         display = "block";
         button1Text = "STOP";
         button2Text = "START";
         updateTarget = UpdateTarget.TimerStopStart;
-        IsTimerSet = true;
         ResumeTimer();
         StateHasChanged();
+    }
+
+    public void SetTimer(Timer timer)
+    {
+        this.myTimer = timer;
+        DisplayTimer();
     }
 
     public void Tick()
@@ -216,7 +226,5 @@
             }
         }
     }
-
-    public bool IsTimerSet = false;
 
 }

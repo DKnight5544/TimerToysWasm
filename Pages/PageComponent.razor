@@ -5,13 +5,15 @@
 @inject HttpClient Http
 @inject NavigationManager NavManager
 
-<input class="page-name"
-       @bind="pageName"
-       @onclick="PageName_onclick"
-       onfocus="this.select();" />
+<div style="display:@displayStyle;">
+    <input class="page-name"
+           @bind="pageName"
+           @onclick="PageName_onclick"
+           onfocus="this.select();" />
 
-<button class="page-button" @onclick="Button1Pressed">@button1Text</button>
-<button class="page-button" @onclick="Button2Pressed">@button2Text</button>
+    <button class="page-button" @onclick="Button1Pressed">@button1Text</button>
+    <button class="page-button" @onclick="Button2Pressed">@button2Text</button>
+</div>
 
 <div></div>
 
@@ -21,7 +23,8 @@
     private string button1Text;
     private string button2Text;
     private UpdateTarget updateTarget;
-    private TimerToyComponent[] timerCompArray;
+    private TimerToyComponent[] timerComponents;
+    private string displayStyle = "none";
 
     public string pageName { get; set; }
 
@@ -33,14 +36,14 @@
             if (string.IsNullOrWhiteSpace(pageName))
             {
                 //cancel
-                SetPage(myTimer);
+                DisplayPage();
             }
             else
             {
                 //save
                 myTimer.PageName = pageName;
                 Http.PostAsJsonAsync("UpdatePageName", myTimer);
-                SetPage(myTimer);
+                DisplayPage();
             }
         }
         else
@@ -57,7 +60,7 @@
         if (updateTarget == UpdateTarget.PageName)
         {
             //cancel
-            SetPage(myTimer);
+            DisplayPage();
         }
         else
         {
@@ -65,7 +68,7 @@
             //NavManager.NavigateTo(string.Format("/{0}", myTimer.PageKey), forceLoad: true);
             var response = await Http.PostAsJsonAsync("AddTimer", myTimer);
             Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
-            timerCompArray.First(t => t.IsTimerSet == false).SetTimer(tmr);
+            timerComponents.First(t => t.IsTimerSet == false).SetTimer(tmr);
         }
 
 
@@ -78,20 +81,21 @@
         button2Text = "CANCEL";
     }
 
-
-    public void SetPage(Timer tmr)
+    private void DisplayPage()
     {
-        myTimer = tmr;
-        pageName = tmr.PageName;
+        pageName = myTimer.PageName;
         updateTarget = UpdateTarget.PageAddButtons;
         button1Text = "ADD PAGE";
         button2Text = "ADD TIMER";
+        displayStyle = "block";
         StateHasChanged();
     }
 
-    public void SetTimerArray(TimerToyComponent[] timerCompArray)
+    public void SetTimerArray(TimerToyComponent[] timerComponents)
     {
-        this.timerCompArray = timerCompArray;
+        this.timerComponents = timerComponents;
+        myTimer = timerComponents[0].myTimer;
+        DisplayPage();
     }
 
 }

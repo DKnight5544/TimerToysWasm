@@ -28,8 +28,6 @@
             NavManager.NavigateTo(string.Format("/{0}", timers[0].PageKey));
         }
 
-        pageComp.SetPage(timers[0]);
-
         int idx = 0;
         foreach (Timer t in timers)
         {
@@ -57,19 +55,18 @@
 
 
     private PageComponent pageComp = new PageComponent();
-    private TimerToyComponent[] tta = new TimerToyComponent[100];
+    private TimerToyComponent[] tta = new TimerToyComponent[50];
 
     protected override async Task OnInitializedAsync()
     {
 
         if (string.IsNullOrWhiteSpace(id))
         {
-            timers = await Http.GetFromJsonAsync<Timer[]>("getnewpage");
+            timers = await Http.GetFromJsonAsync<Timer[]>("GetNewPage");
         }
         else
         {
-            //id = 0652EE5B-FA13-4585-A278-BB1F7D73F38A
-            timers = await Http.GetFromJsonAsync<Timer[]>(string.Format("getallbypage/{0}", id));
+            timers = await Http.GetFromJsonAsync<Timer[]>(string.Format("GetAllByPage/{0}", id));
         }
 
     }
