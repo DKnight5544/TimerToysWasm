@@ -4,21 +4,24 @@
 
 @inject HttpClient Http
 
-<div class="timer-container " style="display:@display;">
+<div class="timer-container " style="display:@displayStyle;">
+
     <input class="timer-name"
            @bind="timerName"
-           @onclick="TimerName_onclick"
+           @onclick="TimerNameClicked"
            tabindex="-1"
            onfocus="this.select();" />
 
     <input class="elapsed-time"
            @bind="elapsedTimeString"
-           @onclick="ElapsedTime_onclick"
+           @onclick="ElapsedTimeClicked"
            tabindex="-1"
            onfocus="this.select()" />
 
+    <button class="delete-button" @onclick="DeleteButtonClicked" tabindex="-1">X</button>
     <button class="timer-button btn1" @onclick="Button1Pressed">@button1Text</button>
     <button class="timer-button btn2" @onclick="Button2Pressed">@button2Text</button>
+
 </div>
 
 @code {
@@ -30,7 +33,7 @@
         get { return ! string.IsNullOrWhiteSpace(myTimer.TimerKey); }
     }
 
-    private string display = "none";
+    private string displayStyle = "none";
     private bool isPaused;
     private string button1Text;
     private string button2Text;
@@ -55,18 +58,25 @@
 
     }
 
-    private void TimerName_onclick()
+    private void TimerNameClicked()
     {
         updateTarget = UpdateTarget.TimerName;
         button1Text = "SAVE";
         button2Text = "CANCEL";
     }
 
-    private void ElapsedTime_onclick()
+    private void ElapsedTimeClicked()
     {
         PauseTimer();
         updateTarget = UpdateTarget.ElapsedTime;
         button1Text = "SAVE";
+        button2Text = "CANCEL";
+    }
+
+    private void DeleteButtonClicked()
+    {
+        updateTarget = UpdateTarget.DeleteButton;
+        button1Text = "DELETE";
         button2Text = "CANCEL";
     }
 
@@ -131,6 +141,14 @@
 
         }
 
+        else if (updateTarget == UpdateTarget.DeleteButton)
+        {
+            myTimer.TimerDescription = timerName;
+            Http.PostAsJsonAsync("DeleteTimer", myTimer);
+            displayStyle = "none";
+            myTimer = new Timer();
+        }
+
         return;
 
     }
@@ -150,6 +168,11 @@
         }
 
         else if (updateTarget == UpdateTarget.TimerName)
+        {
+            DisplayTimer();
+        }
+
+        else if (updateTarget == UpdateTarget.DeleteButton)
         {
             DisplayTimer();
         }
@@ -200,7 +223,7 @@
     {
         timerName = myTimer.TimerDescription;
         elapsedTimeString = stringifyElapsedTime(myTimer.ElapsedTime);
-        display = "block";
+        displayStyle = "block";
         button1Text = "STOP";
         button2Text = "START";
         updateTarget = UpdateTarget.TimerStopStart;
