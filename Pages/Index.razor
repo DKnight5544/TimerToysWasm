@@ -73,11 +73,9 @@
 
     private void Tick(Object stateInfo)
     {
-        int idx = 0;
-        foreach (Timer t in timers)
+        foreach (TimerToyComponent t in tta)
         {
-            tta[idx].Tick();
-            idx++;
+            if(t.IsTimerSet) t.Tick();
         }
     }
 }
