@@ -37,7 +37,13 @@
 
         pageComp.SetTimerArray(tta);
 
-        ticker = new System.Threading.Timer(Tick, null, 1000, 1000);
+        if(ticker == null)
+        {
+            // don't create more than one time.
+            // adding a new page seems to do that. If you are not
+            // carefull you can have several tickers active.
+            ticker = new System.Threading.Timer(Tick, null, 1000, 1000);
+        }
 
     }
 
