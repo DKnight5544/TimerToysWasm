@@ -81,32 +81,13 @@
         button2Text = "CANCEL";
     }
 
-    private void PauseTimer() { isPaused = true; }
-
-    private void ResumeTimer() { isPaused = false; }
-
-    private async void ToggleTimer()
-    {
-        string apiName = string.Format("ToggleTimer/{0}", myTimer.TimerKey);
-        Timer tmr = await Http.GetFromJsonAsync<Timer>(apiName);
-        SetTimer(tmr);
-    }
-
-    private async void AdjustTimer(int seconds)
-    {
-        myTimer.ElapsedTime = seconds;
-        var response = await Http.PostAsJsonAsync("AdjustTimer", myTimer);
-        Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
-        SetTimer(tmr);
-    }
-
     private void Button1Pressed()
     {
 
         if (updateTarget == UpdateTarget.TimerStopStart)
         {
-            //button 1 is STOP
-            if (myTimer.IsRunning) ToggleTimer();
+            //button 1 is START
+            if (!myTimer.IsRunning) ToggleTimer();
 
         }
 
@@ -157,8 +138,8 @@
 
         if (updateTarget == UpdateTarget.TimerStopStart)
         {
-            //button 2 is START
-            if (!myTimer.IsRunning) ToggleTimer();
+            //button 2 is STOP
+            if (myTimer.IsRunning) ToggleTimer();
         }
 
         else if (updateTarget == UpdateTarget.ElapsedTime)
@@ -176,6 +157,25 @@
             DisplayTimer();
         }
 
+    }
+
+    private void PauseTimer() { isPaused = true; }
+
+    private void ResumeTimer() { isPaused = false; }
+
+    private async void ToggleTimer()
+    {
+        string apiName = string.Format("ToggleTimer/{0}", myTimer.TimerKey);
+        Timer tmr = await Http.GetFromJsonAsync<Timer>(apiName);
+        SetTimer(tmr);
+    }
+
+    private async void AdjustTimer(int seconds)
+    {
+        myTimer.ElapsedTime = seconds;
+        var response = await Http.PostAsJsonAsync("AdjustTimer", myTimer);
+        Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
+        SetTimer(tmr);
     }
 
     private int? getSeconds(string secondsString)
@@ -223,8 +223,8 @@
         timerName = myTimer.TimerDescription;
         elapsedTimeString = stringifyElapsedTime(myTimer.ElapsedTime);
         displayStyle = "block";
-        button1Text = "STOP";
-        button2Text = "START";
+        button1Text = "START";
+        button2Text = "STOP";
         updateTarget = UpdateTarget.TimerStopStart;
         ResumeTimer();
         StateHasChanged();
