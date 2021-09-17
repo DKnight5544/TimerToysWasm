@@ -120,4 +120,21 @@ html, body {
     color: maroon;
 }
 
+.donate {
+    background-color: white;
+    color: maroon;
+    border: solid 2px maroon;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+    width: 75px;
+    text-align: center;
+    display:block;
+    clear: both;
+    margin-left: 10px;
+    text-decoration:none;
+}
+
 
