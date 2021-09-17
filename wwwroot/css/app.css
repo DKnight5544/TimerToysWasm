@@ -115,4 +115,9 @@ html, body {
     padding:10px;
 }
 
+.read-only-msg{
+    font-size: 14px;
+    color: maroon;
+}
+
 

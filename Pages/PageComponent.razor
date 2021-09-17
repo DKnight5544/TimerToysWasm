@@ -9,10 +9,18 @@
     <input class="page-name"
            @bind="pageName"
            @onclick="PageName_onclick"
+           disabled="@IsDisabled"
            onfocus="this.select();" />
 
     <button class="page-button" @onclick="Button1Pressed">@button1Text</button>
-    <button class="page-button" @onclick="Button2Pressed">@button2Text</button>
+
+    <button class="page-button" 
+            @onclick="Button2Pressed" 
+            disabled="@IsDisabled" 
+            style="background-color: @BackGroundColor; ">@button2Text</button>
+
+    <button class="page-button" @onclick="Button3Pressed" style="display:@NotReadOnlyMode">READ ONLY</button>
+    <span class="read-only-msg" style="display:@ReadOnlyMode">Read Only Page</span>
 </div>
 
 <div></div>
@@ -25,6 +33,34 @@
     private UpdateTarget updateTarget;
     private TimerToyComponent[] timerComponents;
     private string displayStyle = "none";
+
+
+
+    private bool IsDisabled
+    {
+        get
+        {
+            return string.IsNullOrWhiteSpace(myTimer.TimerKey);
+        }
+    }
+
+    private string BackGroundColor
+    {
+        get
+        {
+            return (IsDisabled) ? "#E8E8E8" : "transparent";
+        }
+    }
+
+    private string ReadOnlyMode
+    {
+        get { return IsDisabled ? "inline" : "none"; }
+    }
+
+    private string NotReadOnlyMode
+    {
+        get { return IsDisabled ? "none" : "inline"; }
+    }
 
     public string pageName { get; set; }
 
@@ -66,12 +102,22 @@
         {
             //Create New Timer
             //NavManager.NavigateTo(string.Format("/{0}", myTimer.PageKey), forceLoad: true);
-            var response = await Http.PostAsJsonAsync("AddTimer", myTimer);
-            Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
-            timerComponents.First(t => t.IsTimerSet == false).SetTimer(tmr);
+            if (!string.IsNullOrWhiteSpace(myTimer.TimerKey))
+            {
+                var response = await Http.PostAsJsonAsync("AddTimer", myTimer);
+                Timer tmr = await response.Content.ReadFromJsonAsync<Timer>();
+                timerComponents.First(t => t.IsTimerSet == false).SetTimer(tmr);
+            }
         }
 
 
+    }
+
+    private void Button3Pressed()
+    {
+        //goto read only page
+        string readOnlyPage = string.Format("/{0}",myTimer.PageKey.Substring(0,28));
+        NavManager.NavigateTo(readOnlyPage, forceLoad: true);
     }
 
     private void PageName_onclick()

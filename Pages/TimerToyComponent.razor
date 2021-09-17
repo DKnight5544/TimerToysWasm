@@ -5,11 +5,11 @@
 @inject HttpClient Http
 
 <div class="timer-container " style="display:@displayStyle;">
-
     <input class="timer-name"
            @bind="timerName"
            @onclick="TimerNameClicked"
            tabindex="-1"
+           disabled="@IsReadOnly"
            onfocus="this.select();" />
 
 
@@ -17,11 +17,12 @@
            @bind="elapsedTimeString"
            @onclick="ElapsedTimeClicked"
            tabindex="-1"
+           disabled="@IsReadOnly"
            onfocus="this.select()" />
 
-    <button class="delete-button" @onclick="DeleteButtonClicked" tabindex="-1">X</button>
-    <button class="timer-button btn1" @onclick="Button1Pressed">@button1Text</button>
-    <button class="timer-button btn2" @onclick="Button2Pressed">@button2Text</button>
+    <button class="delete-button" @onclick="DeleteButtonClicked" tabindex="-1" disabled="@IsReadOnly" style="color: @Color">X</button>
+    <button class="timer-button btn1" @onclick="Button1Pressed" disabled="@IsReadOnly" style="background-color: @BackGroundColor">@button1Text</button>
+    <button class="timer-button btn2" @onclick="Button2Pressed" disabled="@IsReadOnly" style="background-color: @BackGroundColor">@button2Text</button>
 
 </div>
 
@@ -29,9 +30,34 @@
 
 
     public Timer myTimer = new Timer();
+
     public bool IsTimerSet
     {
-        get { return ! string.IsNullOrWhiteSpace(myTimer.TimerKey); }
+        get { return !string.IsNullOrWhiteSpace(myTimer.TimerDescription); }
+    }
+
+    private bool IsReadOnly
+    {
+        get
+        {
+            return string.IsNullOrWhiteSpace(myTimer.TimerKey);
+        }
+    }
+
+    private string BackGroundColor
+    {
+        get
+        {
+            return (IsReadOnly) ? "#E8E8E8" : "transparent";
+        }
+    }
+
+    private string Color
+    {
+        get
+        {
+            return (IsReadOnly) ? "transparent" : "white";
+        }
     }
 
     private string displayStyle = "none";
@@ -125,7 +151,6 @@
 
         else if (updateTarget == UpdateTarget.DeleteButton)
         {
-            myTimer.TimerDescription = timerName;
             Http.PostAsJsonAsync("DeleteTimer", myTimer);
             displayStyle = "none";
             myTimer = new Timer();
