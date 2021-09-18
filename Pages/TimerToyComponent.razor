@@ -1,4 +1,4 @@
-﻿
+﻿@using System
 @using TimerToysShared.Model
 @using TimerToysWasm.Model
 
@@ -65,6 +65,7 @@
     private string button1Text;
     private string button2Text;
     private UpdateTarget updateTarget;
+    private bool isCountDownTimer;
 
     private string timerName { get; set; }
     private string elapsedTimeString { get; set; }
@@ -81,7 +82,12 @@
 
         sec -= (min * 60);
 
-        return string.Format("{0:00}:{1:00}:{2:00}", hrs, min, sec);
+        if (seconds >= 0 && isCountDownTimer)
+        {
+            if(myTimer.IsRunning) ToggleTimer();
+        }
+
+        return string.Format("{0:00}:{1:00}:{2:00}", Math.Abs(hrs), Math.Abs(min), Math.Abs(sec));
 
     }
 
@@ -129,6 +135,7 @@
             if (seconds.HasValue)
             {
                 AdjustTimer(seconds.Value);
+                isCountDownTimer = seconds.Value < 0;
             }
             else
             {
@@ -192,7 +199,19 @@
     {
         string apiName = string.Format("ToggleTimer/{0}", myTimer.TimerKey);
         Timer tmr = await Http.GetFromJsonAsync<Timer>(apiName);
+
+        if (isCountDownTimer && tmr.ElapsedTime >= 0)
+        {
+            isCountDownTimer = false;
+            if(tmr.ElapsedTime > 0)
+            {
+                tmr.ElapsedTime = 0;
+                AdjustTimer(0);
+            }
+        }
+
         SetTimer(tmr);
+
     }
 
     private async void AdjustTimer(int seconds)
@@ -207,7 +226,9 @@
     {
         int? seconds = new int?();
 
-        secondsString = secondsString.Replace(".", ":");
+        bool isNegative = (secondsString.Contains("-"));
+
+        secondsString = secondsString.Replace(".", ":").Replace("-","");
         var arr = secondsString.Split(":");
 
         if (arr.Length > 3)
@@ -232,6 +253,8 @@
             seconds += getSeconds(arr[1], 60);
             seconds += getSeconds(arr[2], 1);
         }
+
+        if (isNegative) seconds = -seconds;
 
         return seconds;
     }
